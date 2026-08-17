@@ -10,7 +10,7 @@ TRUNCATE parking_sessions, vehicles, parking_slots, settings RESTART IDENTITY CA
 -- settings
 -- ---------------------------------------------------------
 INSERT INTO settings (id, rate, total_slots, theme, notifications, motion)
-VALUES (1, 20, 25, 'dark', true, true);
+VALUES (1, 60, 25, 'dark', true, true);
 
 -- ---------------------------------------------------------
 -- 25 parking slots

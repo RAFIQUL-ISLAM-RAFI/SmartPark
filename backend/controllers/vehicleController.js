@@ -1,4 +1,5 @@
 const asyncHandler = require('../utils/asyncHandler');
+const AppError = require('../utils/AppError');
 const parkingService = require('../services/parkingService');
 
 const parkVehicle = asyncHandler(async (req, res) => {
@@ -23,7 +24,11 @@ const searchVehicles = asyncHandler(async (req, res) => {
 });
 
 const getVehicle = asyncHandler(async (req, res) => {
-  const vehicle = await parkingService.getVehicleById(Number(req.params.id));
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    throw new AppError('Invalid vehicle ID!', { status: 400, code: 'INVALID_ID' });
+  }
+  const vehicle = await parkingService.getVehicleById(id);
   res.json({ success: true, vehicle });
 });
 

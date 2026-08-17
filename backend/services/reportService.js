@@ -105,8 +105,14 @@ async function getActivity({ filter = 'all', search = '', sort = 'newest', page 
 }
 
 function withinRangeSql(column, range) {
-  if (range === 'today') return `${column}::date = CURRENT_DATE`;
-  if (/^\d+$/.test(String(range))) return `${column} >= now() - interval '${Number(range)} days'`;
+  const r = String(range || 'all').toLowerCase();
+  if (r === 'today') return `${column}::date = CURRENT_DATE`;
+  if (r === '7') return `${column} >= now() - interval '7 days'`;
+  if (r === '30') return `${column} >= now() - interval '30 days'`;
+  const num = parseInt(r, 10);
+  if (!Number.isNaN(num) && num > 0 && num <= 365) {
+    return `${column} >= now() - interval '${num} days'`;
+  }
   return 'TRUE'; // 'all'
 }
 

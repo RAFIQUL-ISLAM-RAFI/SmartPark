@@ -18,7 +18,7 @@ const { pool } = require('../backend/config/db');
 beforeAll(async () => {
   const schema = fs.readFileSync(path.join(__dirname, '..', 'database', 'schema.sql'), 'utf8');
   await pool.query(schema);
-  await pool.query(`INSERT INTO settings (id, rate, total_slots) VALUES (1, 20, 5)`);
+  await pool.query(`INSERT INTO settings (id, rate, total_slots) VALUES (1, 60, 5)`);
   await pool.query(
     `INSERT INTO parking_slots (slot_number, status) SELECT gs, 'empty' FROM generate_series(1, 5) AS gs`
   );
@@ -108,7 +108,7 @@ describe('POST /api/vehicles/remove', () => {
     const res = await request(app).post('/api/vehicles/remove').send({ slotNumber: 1, outTime: 12 });
     expect(res.status).toBe(200);
     expect(res.body.receipt.hours).toBe(3);
-    expect(res.body.receipt.fee).toBe(60); // 3h * rate 20
+    expect(res.body.receipt.fee).toBe(180); // 3h * rate 60
   });
 
   it('computes an overnight wrap correctly', async () => {
@@ -117,6 +117,15 @@ describe('POST /api/vehicles/remove', () => {
     const res = await request(app).post('/api/vehicles/remove').send({ slotNumber: 1, outTime: 6 });
     expect(res.status).toBe(200);
     expect(res.body.receipt.hours).toBe(8); // 24 - (22-6)
+  });
+
+  it('computes a same-hour stay as 1-hour minimum charge', async () => {
+    await request(app).post('/api/vehicles/park').send({ type: 'Car', plate: 'TEST-SAME', owner: 'Quick Stay', inTime: 10 });
+    // slot 1 was emptied earlier
+    const res = await request(app).post('/api/vehicles/remove').send({ slotNumber: 1, outTime: 10 });
+    expect(res.status).toBe(200);
+    expect(res.body.receipt.hours).toBe(1); // 1h minimum
+    expect(res.body.receipt.fee).toBe(60); // 1h * rate 60
   });
 
   it('rejects removal from an already-empty slot', async () => {
@@ -144,6 +153,12 @@ describe('GET /api/slots and /api/vehicles', () => {
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.vehicles)).toBe(true);
   });
+
+  it('rejects invalid vehicle ID lookups gracefully', async () => {
+    const res = await request(app).get('/api/vehicles/invalid-id');
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe('INVALID_ID');
+  });
 });
 
 describe('GET /api/dashboard', () => {
@@ -168,13 +183,19 @@ describe('GET/PUT /api/settings', () => {
   it('reads current settings', async () => {
     const res = await request(app).get('/api/settings');
     expect(res.status).toBe(200);
-    expect(res.body.settings.rate).toBe(20);
+    expect(res.body.settings.rate).toBe(60);
   });
 
   it('updates the rate', async () => {
-    const res = await request(app).put('/api/settings').send({ rate: 25 });
+    const res = await request(app).put('/api/settings').send({ rate: 70 });
     expect(res.status).toBe(200);
-    expect(res.body.settings.rate).toBe(25);
+    expect(res.body.settings.rate).toBe(70);
+  });
+
+  it('expands total slots using safe bulk insertion', async () => {
+    const res = await request(app).put('/api/settings').send({ totalSlots: 8 });
+    expect(res.status).toBe(200);
+    expect(res.body.settings.totalSlots).toBe(8);
   });
 
   it('refuses to shrink total slots below the occupied count', async () => {

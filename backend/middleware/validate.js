@@ -6,9 +6,9 @@ const AppError = require('../utils/AppError');
 
 const VEHICLE_TYPES = ['Car', 'Bike', 'Truck'];
 
-// A "0–23 integer, but may arrive as a string from a form/JSON body"
+// A "0–23 integer, defaults to current system hour if omitted"
 const hourField = z.preprocess((val) => {
-  if (val === '' || val === null || val === undefined) return undefined;
+  if (val === '' || val === null || val === undefined) return new Date().getHours();
   const n = Number(val);
   return Number.isNaN(n) ? val : n;
 }, z.number().int('Please enter a valid time between 0 and 23.').min(0, 'Please enter a valid time between 0 and 23.').max(23, 'Please enter a valid time between 0 and 23.'));
@@ -17,12 +17,12 @@ const parkVehicleSchema = z.object({
   type: z.enum(VEHICLE_TYPES, { errorMap: () => ({ message: 'Invalid vehicle type!' }) }),
   plate: z.string({ required_error: 'Plate number is required.' }).trim().min(1, 'Plate number is required.').max(20, 'Plate number is too long.'),
   owner: z.string({ required_error: 'Owner name is required.' }).trim().min(1, 'Owner name is required.').max(80, 'Owner name is too long.'),
-  inTime: hourField,
+  inTime: hourField.default(() => new Date().getHours()),
 });
 
 const removeVehicleSchema = z.object({
   slotNumber: z.preprocess((val) => (val === '' || val === null ? undefined : Number(val)), z.number().int('Invalid slot number!').positive('Invalid slot number!')),
-  outTime: hourField,
+  outTime: hourField.default(() => new Date().getHours()),
 });
 
 const settingsSchema = z

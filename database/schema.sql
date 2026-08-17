@@ -82,7 +82,7 @@ CREATE INDEX idx_sessions_closed_at ON parking_sessions (closed_at);
 -- ---------------------------------------------------------
 CREATE TABLE settings (
   id             INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  rate           INTEGER NOT NULL DEFAULT 20 CHECK (rate > 0),
+  rate           INTEGER NOT NULL DEFAULT 60 CHECK (rate > 0),
   total_slots    INTEGER NOT NULL DEFAULT 25 CHECK (total_slots > 0 AND total_slots <= 200),
   theme          TEXT NOT NULL DEFAULT 'dark' CHECK (theme IN ('dark', 'light')),
   notifications  BOOLEAN NOT NULL DEFAULT true,

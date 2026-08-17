@@ -17,6 +17,74 @@ function setRing(el, circumference, pct) {
 }
 
 // ---------------------------------------------------------
+// Connection Health Status
+// ---------------------------------------------------------
+function renderConnectionStatus() {
+  const conn = store.state.connection;
+  const el = document.getElementById('connectionPill');
+  if (!el) return;
+
+  if (conn.status === 'connected') {
+    el.className = 'conn-pill conn-pill--online';
+    el.innerHTML = `<span class="conn-dot"></span><span>PostgreSQL Connected</span><span class="conn-lat">${conn.latency}ms</span>`;
+    el.title = `Connected to PostgreSQL database · API Latency: ${conn.latency}ms`;
+  } else if (conn.status === 'connecting') {
+    el.className = 'conn-pill conn-pill--connecting';
+    el.innerHTML = `<span class="conn-dot"></span><span>Connecting DB...</span>`;
+    el.title = 'Connecting to backend database...';
+  } else {
+    el.className = 'conn-pill conn-pill--offline';
+    el.innerHTML = `<span class="conn-dot"></span><span>Database Offline</span>`;
+    el.title = `PostgreSQL not connected. Make sure PostgreSQL is running and DATABASE_URL is set in .env`;
+  }
+}
+
+// ---------------------------------------------------------
+// SVG QR Code Ticket Generator
+// ---------------------------------------------------------
+function generateTicketQR(ticketData) {
+  const hash = String(ticketData).split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) % 1000000007, 42);
+  const size = 21;
+  let rects = '';
+
+  const isFinder = (r, c) => {
+    if (r < 7 && c < 7) return true;
+    if (r < 7 && c >= size - 7) return true;
+    if (r >= size - 7 && c < 7) return true;
+    return false;
+  };
+
+  const isFinderFilled = (r, c) => {
+    const checkPattern = (pr, pc) => {
+      if (pr === 0 || pr === 6 || pc === 0 || pc === 6) return true;
+      if (pr >= 2 && pr <= 4 && pc >= 2 && pc <= 4) return true;
+      return false;
+    };
+    if (r < 7 && c < 7) return checkPattern(r, c);
+    if (r < 7 && c >= size - 7) return checkPattern(r, c - (size - 7));
+    if (r >= size - 7 && c < 7) return checkPattern(r - (size - 7), c);
+    return false;
+  };
+
+  let pseudoRandom = hash;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      let filled = false;
+      if (isFinder(r, c)) {
+        filled = isFinderFilled(r, c);
+      } else {
+        pseudoRandom = (pseudoRandom * 16807) % 2147483647;
+        filled = (pseudoRandom % 3) === 0 || (r + c) % 3 === 0;
+      }
+      if (filled) {
+        rects += `<rect x="${c * 6}" y="${r * 6}" width="6" height="6" fill="currentColor"/>`;
+      }
+    }
+  }
+  return `<svg viewBox="0 0 126 126" width="126" height="126" class="ticket-qr-svg" role="img" aria-label="QR Code">${rects}</svg>`;
+}
+
+// ---------------------------------------------------------
 // Dashboard
 // ---------------------------------------------------------
 function renderDashboard() {
@@ -56,7 +124,7 @@ function renderDashboard() {
   miniLot.innerHTML = state.slots
     .map(
       (s) =>
-        `<div class="mini-slot ${s.vehicle ? 'is-occupied' : ''}" title="Slot ${s.slotNumber}${s.vehicle ? ' — ' + s.vehicle.plate : ' — empty'}">${s.slotNumber}</div>`
+        `<div class="mini-slot ${s.vehicle ? 'is-occupied' : ''}" title="Slot ${s.slotNumber}${s.vehicle ? ' — ' + escapeHtml(s.vehicle.plate) : ' — empty'}">${s.slotNumber}</div>`
     )
     .join('');
 
@@ -64,7 +132,7 @@ function renderDashboard() {
   const feed = document.getElementById('dashActivityFeed');
   const recent = state.history.slice(0, 8);
   if (!recent.length) {
-    feed.innerHTML = '';
+    feed.innerHTML = '<li class="activity-empty"><p>No recent activity recorded.</p></li>';
   } else {
     feed.innerHTML = recent
       .map((h) => activityItemHTML(h))
@@ -76,8 +144,8 @@ function activityItemHTML(h) {
   const isParked = h.event === 'park';
   const verb = isParked ? 'parked' : 'removed';
   const detail = isParked
-    ? `Slot ${h.slotNumber} · IN ${fmtTime(h.inTime)}`
-    : `Slot ${h.slotNumber} · ${h.hours}h · ${fmtFee(h.fee)}`;
+    ? `Slot #${String(h.slotNumber).padStart(2, '0')} · IN ${fmtTime(h.inTime)}`
+    : `Slot #${String(h.slotNumber).padStart(2, '0')} · ${h.hours || 1}h · ${fmtFee(h.fee || 0)}`;
   return `
     <li class="activity-item">
       <span class="activity-dot activity-dot--${h.event}"></span>
@@ -112,10 +180,9 @@ function renderLot({ filter = 'all', search = '' } = {}) {
   };
 
   const visible = state.slots.filter(matches);
-  emptyState.hidden = visible.length !== 0 || (!q && filter === 'all');
   if (visible.length === 0 && (q || filter !== 'all')) {
     emptyState.hidden = false;
-    emptyState.textContent = 'No vehicles found.';
+    emptyState.textContent = 'No matching parking bays found.';
   } else {
     emptyState.hidden = true;
   }
@@ -130,12 +197,12 @@ function renderLot({ filter = 'all', search = '' } = {}) {
       return `
         <div class="slot ${occupied ? 'is-occupied' : 'is-empty'} ${typeClass}"
              data-slot="${slot.slotNumber}" ${style}
-             role="listitem" tabindex="${occupied ? '0' : '-1'}"
+             role="listitem" tabindex="0"
              aria-label="Slot ${slot.slotNumber}, ${occupied ? 'occupied by ' + slot.vehicle.type + ' ' + slot.vehicle.plate : 'empty'}">
-          <span class="slot-num">${String(slot.slotNumber).padStart(2, '0')}</span>
+          <span class="slot-num">#${String(slot.slotNumber).padStart(2, '0')}</span>
           <span class="slot-icon">${icon}</span>
           <span class="slot-status">${occupied ? 'Occupied' : 'Empty'}</span>
-          ${occupied ? `<span class="slot-plate">${escapeHtml(slot.vehicle.plate)}</span>` : ''}
+          ${occupied ? `<span class="slot-plate">${escapeHtml(slot.vehicle.plate)}</span>` : '<span class="slot-plate slot-plate--avail">Available</span>'}
         </div>`;
     })
     .join('');
@@ -153,15 +220,15 @@ function flashSlot(slotNumber, kind) {
 }
 
 // ---------------------------------------------------------
-// Park view
+// Park view preview
 // ---------------------------------------------------------
 function renderParkPreview() {
   const available = getAvailableSlots();
   const next = available[0];
-  document.getElementById('nextSlotNumber').textContent = next ? String(next.slotNumber).padStart(2, '0') : '—';
+  document.getElementById('nextSlotNumber').textContent = next ? `#${String(next.slotNumber).padStart(2, '0')}` : '—';
   document.getElementById('nextSlotVisual').querySelector('.next-slot-caption').textContent = next
-    ? 'Slot ready for assignment'
-    : 'Facility is full';
+    ? 'Next auto-assigned bay'
+    : 'Parking facility is currently full';
   document.getElementById('qsAvailable').textContent = available.length;
   document.getElementById('qsOccupied').textContent = getOccupiedSlots().length;
 }
@@ -187,13 +254,12 @@ function renderVehiclesTable({ filter = 'all', search = '' } = {}) {
   if (!rows.length) {
     tbody.innerHTML = '';
     emptyState.hidden = false;
-    emptyState.textContent = state.slots.some((s) => s.vehicle) ? 'No vehicles found.' : 'Your parking area is clear.';
+    emptyState.textContent = state.slots.some((s) => s.vehicle) ? 'No vehicles matching search filter.' : 'Your parking facility has no active vehicles.';
     return;
   }
   emptyState.hidden = true;
 
-  const now = new Date();
-  const currentHour = now.getHours();
+  const currentHour = new Date().getHours();
 
   tbody.innerHTML = rows
     .map((slot) => {
@@ -201,14 +267,18 @@ function renderVehiclesTable({ filter = 'all', search = '' } = {}) {
       const fee = computeFee(hours);
       return `
         <tr>
-          <td class="mono">#${String(slot.slotNumber).padStart(2, '0')}</td>
+          <td class="mono font-bold">#${String(slot.slotNumber).padStart(2, '0')}</td>
           <td><span class="badge badge--${slot.vehicle.type}">${slot.vehicle.type}</span></td>
-          <td class="mono">${escapeHtml(slot.vehicle.plate)}</td>
+          <td class="mono font-bold">${escapeHtml(slot.vehicle.plate)}</td>
           <td>${escapeHtml(slot.vehicle.owner)}</td>
           <td class="mono">${fmtTime(slot.inTime)}</td>
-          <td>${hours}h (so far)</td>
-          <td class="mono">${fmtFee(fee)}</td>
-          <td><button class="row-action-btn" data-remove-slot="${slot.slotNumber}" type="button">Remove</button></td>
+          <td>${hours}h so far</td>
+          <td class="mono font-bold text-accent">${fmtFee(fee)}</td>
+          <td>
+            <button class="row-action-btn" data-remove-slot="${slot.slotNumber}" type="button">
+              Check Out
+            </button>
+          </td>
         </tr>`;
     })
     .join('');
@@ -238,7 +308,7 @@ function renderActivityTable({ filter = 'all', search = '', sort = 'newest' } = 
   if (!rows.length) {
     tbody.innerHTML = '';
     emptyState.hidden = false;
-    emptyState.textContent = state.history.length ? 'No vehicles found.' : 'No parking activity yet.';
+    emptyState.textContent = state.history.length ? 'No activity matching your search filter.' : 'No parking activity logged yet.';
     return;
   }
   emptyState.hidden = true;
@@ -247,16 +317,16 @@ function renderActivityTable({ filter = 'all', search = '', sort = 'newest' } = 
     .map(
       (h) => `
         <tr>
-          <td><span class="badge badge--${h.event}">${h.event === 'park' ? 'Parked' : 'Removed'}</span></td>
-          <td class="mono">#${String(h.slotNumber).padStart(2, '0')}</td>
+          <td><span class="badge badge--${h.event}">${h.event === 'park' ? 'Parked' : 'Checked Out'}</span></td>
+          <td class="mono font-bold">#${String(h.slotNumber).padStart(2, '0')}</td>
           <td><span class="badge badge--${h.type}">${h.type}</span></td>
-          <td class="mono">${escapeHtml(h.plate)}</td>
+          <td class="mono font-bold">${escapeHtml(h.plate)}</td>
           <td>${escapeHtml(h.owner)}</td>
           <td class="mono">${fmtTime(h.inTime)}</td>
           <td class="mono">${h.outTime === null ? '—' : fmtTime(h.outTime)}</td>
           <td>${h.hours === null ? '—' : h.hours + 'h'}</td>
-          <td class="mono">${h.fee === null ? '—' : fmtFee(h.fee)}</td>
-          <td class="mono">${fmtDateTime(h.ts)}</td>
+          <td class="mono font-bold">${h.fee === null ? '—' : fmtFee(h.fee)}</td>
+          <td class="mono text-muted">${fmtDateTime(h.ts)}</td>
         </tr>`
     )
     .join('');
@@ -283,7 +353,7 @@ function renderReports(range = 'all') {
   const totalSessions = removals.length;
   const revenue = removals.reduce((s, h) => s + (h.fee || 0), 0);
   const avgDuration = removals.length
-    ? Math.round((removals.reduce((s, h) => s + h.hours, 0) / removals.length) * 10) / 10
+    ? Math.round((removals.reduce((s, h) => s + (h.hours || 1), 0) / removals.length) * 10) / 10
     : 0;
 
   animateCounter(document.querySelector('[data-counter="repTotalVehicles"]'), totalVehicles);
@@ -293,7 +363,7 @@ function renderReports(range = 'all') {
     formatter: (n) => (Math.round(n * 10) / 10).toFixed(1),
   });
 
-  // distribution donut (by parked vehicles in range)
+  // distribution donut
   const byType = { Car: 0, Bike: 0, Truck: 0 };
   parks.forEach((h) => { byType[h.type] = (byType[h.type] || 0) + 1; });
   const cssVar = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -307,10 +377,10 @@ function renderReports(range = 'all') {
     .map((t) => `<span class="chart-legend-item"><i style="background:${cssVar(t === 'Car' ? '--blue' : t === 'Bike' ? '--pink' : '--violet')}"></i>${t} (${byType[t]})</span>`)
     .join('');
 
-  // occupancy gauge (current, always live regardless of range)
+  // occupancy gauge
   drawGauge(document.getElementById('chartOccupancy'), getOccupancyRate());
 
-  // revenue by day (last 7 buckets within range, or last 7 overall if 'all'/'today')
+  // revenue by day
   const days = [];
   const bucketCount = 7;
   for (let i = bucketCount - 1; i >= 0; i--) {
@@ -348,9 +418,10 @@ function renderSettingsForm() {
 }
 
 // ---------------------------------------------------------
-// Full re-render (used after any state change while a view is active)
+// Full re-render
 // ---------------------------------------------------------
 function renderAll(activeView, filters) {
+  renderConnectionStatus();
   renderDashboard();
   if (activeView === 'slots') renderLot(filters.slots);
   if (activeView === 'park') renderParkPreview();
@@ -358,11 +429,22 @@ function renderAll(activeView, filters) {
   if (activeView === 'activity') renderActivityTable(filters.activity);
   if (activeView === 'reports') renderReports(filters.reportRange);
   if (activeView === 'settings') renderSettingsForm();
-  // park preview stats are cheap, keep fresh always for the quick-park header
   renderParkPreview();
 }
 
 window.SP = window.SP || {};
-window.SP.render = { renderDashboard, renderLot, flashSlot, renderParkPreview, renderVehiclesTable, renderActivityTable, renderReports, renderSettingsForm, renderAll };
+window.SP.render = {
+  renderConnectionStatus,
+  generateTicketQR,
+  renderDashboard,
+  renderLot,
+  flashSlot,
+  renderParkPreview,
+  renderVehiclesTable,
+  renderActivityTable,
+  renderReports,
+  renderSettingsForm,
+  renderAll,
+};
 
 })();

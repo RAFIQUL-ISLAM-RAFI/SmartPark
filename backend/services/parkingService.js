@@ -24,6 +24,9 @@ async function getSettingsRow(client) {
 // ---------------------------------------------------------
 async function parkVehicle({ type, plate, owner, inTime }) {
   const plateNormalized = normalizePlate(plate);
+  const assignedInTime = (inTime === undefined || inTime === null || inTime === '')
+    ? new Date().getHours()
+    : Number(inTime);
 
   return withTransaction(async (client) => {
     // Reject if this plate already has an active session anywhere.
@@ -65,7 +68,7 @@ async function parkVehicle({ type, plate, owner, inTime }) {
       `INSERT INTO parking_sessions
          (vehicle_id, slot_id, slot_number, type, plate, plate_normalized, owner, in_time, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active')`,
-      [vehicleId, slot.id, slot.slot_number, type, plate.trim(), plateNormalized, owner.trim(), inTime]
+      [vehicleId, slot.id, slot.slot_number, type, plate.trim(), plateNormalized, owner.trim(), assignedInTime]
     );
 
     await client.query(`UPDATE parking_slots SET status = 'occupied' WHERE id = $1`, [slot.id]);
@@ -78,6 +81,10 @@ async function parkVehicle({ type, plate, owner, inTime }) {
 // Remove a vehicle
 // ---------------------------------------------------------
 async function removeVehicle({ slotNumber, outTime }) {
+  const assignedOutTime = (outTime === undefined || outTime === null || outTime === '')
+    ? new Date().getHours()
+    : Number(outTime);
+
   return withTransaction(async (client) => {
     const slotResult = await client.query(
       `SELECT id, status FROM parking_slots WHERE slot_number = $1 FOR UPDATE`,
@@ -98,14 +105,14 @@ async function removeVehicle({ slotNumber, outTime }) {
     }
 
     const settings = await getSettingsRow(client);
-    const hours = computeHours(session.in_time, outTime);
+    const hours = computeHours(session.in_time, assignedOutTime);
     const fee = computeFee(hours, settings.rate);
 
     await client.query(
       `UPDATE parking_sessions
          SET status = 'completed', out_time = $1, hours = $2, fee = $3, closed_at = now()
        WHERE id = $4`,
-      [outTime, hours, fee, session.id]
+      [assignedOutTime, hours, fee, session.id]
     );
     await client.query(`UPDATE parking_slots SET status = 'empty' WHERE id = $1`, [slot.id]);
 
@@ -116,7 +123,7 @@ async function removeVehicle({ slotNumber, outTime }) {
         plate: session.plate,
         owner: session.owner,
         inTime: session.in_time,
-        outTime,
+        outTime: assignedOutTime,
         hours,
         fee,
       },

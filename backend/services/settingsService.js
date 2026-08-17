@@ -39,12 +39,14 @@ async function updateSettings(partial) {
       const { rows: slotRows } = await client.query('SELECT id, slot_number, status FROM parking_slots ORDER BY slot_number');
 
       if (requested > slotRows.length) {
-        // Add empty trailing slots.
-        const inserts = [];
+        // Add empty trailing slots using a single bulk insert.
+        const values = [];
+        const params = [];
         for (let n = slotRows.length + 1; n <= requested; n++) {
-          inserts.push(client.query(`INSERT INTO parking_slots (slot_number, status) VALUES ($1, 'empty')`, [n]));
+          params.push(n);
+          values.push(`($${params.length}, 'empty')`);
         }
-        await Promise.all(inserts);
+        await client.query(`INSERT INTO parking_slots (slot_number, status) VALUES ${values.join(',')}`, params);
         next.total_slots = requested;
       } else if (requested < slotRows.length) {
         // Only remove empty trailing slots — never touch occupied ones,

@@ -11,15 +11,18 @@
 // =========================================================
 
 function computeHours(inTime, outTime) {
+  if (inTime === outTime) {
+    return 1; // Minimum 1-hour billing for same-hour stay
+  }
   let hours = outTime - inTime;
-  if (hours <= 0) {
+  if (hours < 0) {
     hours = 24 - (inTime - outTime);
   }
-  return hours;
+  return Math.max(1, hours);
 }
 
 function computeFee(hours, rate) {
-  return hours * rate;
+  return Math.max(1, hours) * rate;
 }
 
 module.exports = { computeHours, computeFee };

@@ -8,15 +8,26 @@
 
   async function request(path, options = {}) {
     let res;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeout || 12000);
+
     try {
       res = await fetch(BASE + path, {
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         ...options,
       });
     } catch (networkErr) {
-      const err = new Error('Could not reach the server. Check your connection and try again.');
-      err.code = 'NETWORK_ERROR';
+      const isTimeout = networkErr.name === 'AbortError';
+      const err = new Error(
+        isTimeout
+          ? 'Server request timed out. Please try again.'
+          : 'Could not reach the server. Check your connection and try again.'
+      );
+      err.code = isTimeout ? 'TIMEOUT_ERROR' : 'NETWORK_ERROR';
       throw err;
+    } finally {
+      clearTimeout(timeoutId);
     }
 
     let data = null;
@@ -44,13 +55,20 @@
   };
 
   const api = {
-    health: () => request('/health'),
+    health: async () => {
+      const t0 = performance.now();
+      const res = await request('/health');
+      const latency = Math.round(performance.now() - t0);
+      return { ...res, latency };
+    },
 
     getDashboard: () => request('/dashboard'),
 
     getSlots: () => request('/slots'),
 
     getVehicles: (params) => request('/vehicles' + qs(params)),
+
+    getVehicle: (id) => request(`/vehicles/${id}`),
 
     parkVehicle: (payload) => request('/vehicles/park', { method: 'POST', body: JSON.stringify(payload) }),
 

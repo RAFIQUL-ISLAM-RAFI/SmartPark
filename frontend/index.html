@@ -86,6 +86,11 @@
     </div>
 
     <div class="topbar-actions">
+      <div class="conn-pill-wrapper" id="connectionPillWrapper">
+        <div class="conn-pill conn-pill--connecting" id="connectionPill" role="status" aria-live="polite">
+          <span class="conn-dot"></span><span>Connecting...</span>
+        </div>
+      </div>
       <button class="icon-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
         <svg viewBox="0 0 24 24" id="themeIcon"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-7.54-7.54A9 9 0 0 0 12 3z"/></svg>
       </button>
@@ -274,8 +279,8 @@
           </div>
 
           <div class="form-row">
-            <label for="inTime">IN Time <span class="hint">(0–23)</span></label>
-            <input type="number" id="inTime" min="0" max="23" placeholder="e.g. 9">
+            <label for="inTime">Check-In Time <span class="hint">(Auto-fills current time)</span></label>
+            <input type="number" id="inTime" min="0" max="23" placeholder="Auto (Current hour)">
             <span class="field-error" id="err-inTime"></span>
           </div>
 
@@ -535,6 +540,16 @@
       <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
     <div class="modal-body" id="removeModalBody"></div>
+  </div>
+</div>
+
+<!-- ===================== PARKING TICKET MODAL ===================== -->
+<div class="modal-overlay" id="ticketModalOverlay">
+  <div class="modal modal--ticket" id="ticketModal" role="dialog" aria-modal="true" aria-labelledby="ticketTitle">
+    <button class="modal-close" id="ticketModalClose" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="modal-body" id="ticketModalBody"></div>
   </div>
 </div>
 
