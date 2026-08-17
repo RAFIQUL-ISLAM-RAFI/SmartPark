@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPark — Parking Management System</title>
+<meta name="description" content="SmartPark: an intelligent parking management system for tracking bays, vehicles and revenue in real time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Skip link for a11y -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="app-shell">
+
+  <!-- ===================== SIDEBAR (desktop) ===================== -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22" fill="none">
+          <rect x="2" y="2" width="28" height="28" rx="7" fill="var(--accent)"/>
+          <path d="M11 22V10h6.2a3.9 3.9 0 0 1 0 7.8H13.6V22" stroke="#0B0E14" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="brand-name">SmartPark</span>
+    </div>
+
+    <nav class="nav-list" data-nav>
+      <button class="nav-item is-active" data-route="dashboard" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9zm0 7h6v-5H4v5zm10 0h6V11h-6v9zm0-16v5h6V4h-6z"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-route="slots" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 4h18v3H3V4zm0 6.5h7v10H3v-10zm11 0h7v10h-7v-10z"/></svg>
+        <span>Parking Slots</span>
+      </button>
+      <button class="nav-item" data-route="park" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2a1 1 0 0 1 1 1v8h8a1 1 0 1 1 0 2h-8v8a1 1 0 1 1-2 0v-8H3a1 1 0 1 1 0-2h8V3a1 1 0 0 1 1-1z"/></svg>
+        <span>Park Vehicle</span>
+      </button>
+      <button class="nav-item" data-route="vehicles" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M5 11l1.6-4.8A2 2 0 0 1 8.5 5h7a2 2 0 0 1 1.9 1.2L19 11m-14 0h14m-14 0a2 2 0 0 0-2 2v5h2m14-7a2 2 0 0 1 2 2v5h-2m-14 0v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2m10 0v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2m-14 0h14"/></svg>
+        <span>Vehicles</span>
+      </button>
+      <button class="nav-item" data-route="activity" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm1-15h-2v6l5.2 3.1 1-1.6L13 12V7z"/></svg>
+        <span>Activity</span>
+      </button>
+      <button class="nav-item" data-route="reports" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm2 13h2V9H7v7zm4 0h2V6h-2v10zm4 0h2v-4h-2v4z"/></svg>
+        <span>Reports</span>
+      </button>
+      <button class="nav-item" data-route="settings" type="button">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.4 13a7.4 7.4 0 0 0 .06-1 7.4 7.4 0 0 0-.06-1l2.1-1.6a.5.5 0 0 0 .12-.66l-2-3.4a.5.5 0 0 0-.6-.22l-2.5 1a7.6 7.6 0 0 0-1.7-1L14.3 2.4a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4l-.4 2.7a7.6 7.6 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.22l-2 3.4a.5.5 0 0 0 .12.66L4.6 11a7.4 7.4 0 0 0 0 2l-2.1 1.6a.5.5 0 0 0-.12.66l2 3.4c.14.23.4.32.6.22l2.5-1c.5.4 1.08.74 1.7 1l.4 2.7a.5.5 0 0 0 .5.4h4a.5.5 0 0 0 .5-.4l.4-2.7c.62-.26 1.2-.6 1.7-1l2.5 1c.2.1.46 0 .6-.22l2-3.4a.5.5 0 0 0-.12-.66L19.4 13zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="occupancy-mini" aria-hidden="true">
+        <svg viewBox="0 0 36 36" class="ring-svg">
+          <circle cx="18" cy="18" r="15.5" class="ring-track"/>
+          <circle cx="18" cy="18" r="15.5" class="ring-fill" id="sidebarRing"/>
+        </svg>
+        <div class="occupancy-mini-text">
+          <strong id="sidebarOccPct">0%</strong>
+          <span>occupied</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="topbar">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+
+    <div class="topbar-search">
+      <svg viewBox="0 0 24 24" class="search-icon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="search" id="globalSearch" placeholder="Search plate, owner, or slot…" aria-label="Search vehicles">
+    </div>
+
+    <div class="topbar-actions">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg viewBox="0 0 24 24" id="themeIcon"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-7.54-7.54A9 9 0 0 0 12 3z"/></svg>
+      </button>
+      <button class="btn btn-primary btn-quick-park" data-route="park" type="button">
+        <svg viewBox="0 0 24 24" class="btn-icon"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Park Vehicle</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main id="main-content" class="content">
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view is-active" id="view-dashboard" data-view="dashboard">
+
+      <div class="hero">
+        <div class="hero-grid-bg" aria-hidden="true"></div>
+        <div class="hero-scanline" aria-hidden="true"></div>
+        <div class="hero-content">
+          <p class="eyebrow">Live facility overview</p>
+          <h1 class="hero-title">Parking,<br><span>simplified.</span></h1>
+          <p class="hero-sub">Manage every vehicle, every slot, and every transaction from one intelligent parking system.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg" data-route="park" type="button">
+              <svg viewBox="0 0 24 24" class="btn-icon"><path d="M12 5v14M5 12h14"/></svg>
+              Quick Park Vehicle
+            </button>
+            <button class="btn btn-ghost btn-lg" data-route="slots" type="button">View Parking Map</button>
+          </div>
+        </div>
+        <div class="hero-stat-card">
+          <svg viewBox="0 0 120 120" class="hero-ring">
+            <circle cx="60" cy="60" r="52" class="ring-track"/>
+            <circle cx="60" cy="60" r="52" class="ring-fill" id="heroRing"/>
+          </svg>
+          <div class="hero-stat-text">
+            <span class="hero-stat-num" id="heroOccPct">0%</span>
+            <span class="hero-stat-label">Occupancy</span>
+          </div>
+          <div class="hero-stat-sub">
+            <span><strong id="heroAvailable">25</strong> available</span>
+            <span><strong id="heroOccupied">0</strong> occupied</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--slots"><svg viewBox="0 0 24 24"><path d="M3 4h18v3H3V4zm0 6.5h7v10H3v-10zm11 0h7v10h-7v-10z"/></svg></div>
+          <div class="stat-body">
+            <span class="stat-label">Total Slots</span>
+            <span class="stat-value" data-counter="totalSlots">25</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--occupied"><svg viewBox="0 0 24 24"><path d="M12 2a1 1 0 0 1 1 1v8h8a1 1 0 1 1 0 2h-8v8a1 1 0 1 1-2 0v-8H3a1 1 0 1 1 0-2h8V3a1 1 0 0 1 1-1z" transform="rotate(45 12 12)"/></svg></div>
+          <div class="stat-body">
+            <span class="stat-label">Occupied Slots</span>
+            <span class="stat-value" data-counter="occupiedSlots">0</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--available"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div class="stat-body">
+            <span class="stat-label">Available Slots</span>
+            <span class="stat-value" data-counter="availableSlots">25</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--vehicles"><svg viewBox="0 0 24 24"><path d="M5 11l1.6-4.8A2 2 0 0 1 8.5 5h7a2 2 0 0 1 1.9 1.2L19 11m-14 0h14m-14 0a2 2 0 0 0-2 2v5h2m14-7a2 2 0 0 1 2 2v5h-2m-14 0v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2m10 0v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2m-14 0h14"/></svg></div>
+          <div class="stat-body">
+            <span class="stat-label">Total Vehicles Today</span>
+            <span class="stat-value" data-counter="totalVehiclesToday">0</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--revenue"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.4-5 3.2S9 9 12 9.5s5 1.3 5 3.3-2.2 3.2-5 3.2-5-1.6-5-3.5"/></svg></div>
+          <div class="stat-body">
+            <span class="stat-label">Today's Revenue</span>
+            <span class="stat-value"><span data-counter="todaysRevenue">0</span> ৳</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--occrate"><svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm1-15h-2v6l5.2 3.1 1-1.6L13 12V7z"/></svg></div>
+          <div class="stat-body">
+            <span class="stat-label">Occupancy Rate</span>
+            <span class="stat-value"><span data-counter="occRate">0</span>%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-columns">
+        <div class="panel panel-map-preview">
+          <div class="panel-head">
+            <h2>Facility Overview</h2>
+            <button class="link-btn" data-route="slots" type="button">Open full map →</button>
+          </div>
+          <div class="mini-lot" id="miniLot" aria-label="Mini parking overview"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Recent Activity</h2>
+            <button class="link-btn" data-route="activity" type="button">View all →</button>
+          </div>
+          <ul class="activity-feed" id="dashActivityFeed"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PARKING SLOTS ---------- -->
+    <section class="view" id="view-slots" data-view="slots">
+      <div class="view-head">
+        <div>
+          <h1>Parking Slots</h1>
+          <p class="view-sub">Live layout of all 25 bays. Click any occupied slot for details.</p>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i class="dot dot--empty"></i>Empty</span>
+          <span class="legend-item"><i class="dot dot--occupied"></i>Occupied</span>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="chip-group" id="slotFilterChips" role="group" aria-label="Filter slots">
+          <button class="chip is-active" data-filter="all" type="button">All</button>
+          <button class="chip" data-filter="empty" type="button">Empty</button>
+          <button class="chip" data-filter="occupied" type="button">Occupied</button>
+          <button class="chip" data-filter="Car" type="button">Car</button>
+          <button class="chip" data-filter="Bike" type="button">Bike</button>
+          <button class="chip" data-filter="Truck" type="button">Truck</button>
+        </div>
+        <div class="mini-search">
+          <svg viewBox="0 0 24 24" class="search-icon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" id="slotSearch" placeholder="Search plate, owner, or slot #">
+        </div>
+      </div>
+
+      <div class="lot-wrap">
+        <div class="lot" id="parkingLot" role="list" aria-label="Parking bays"></div>
+      </div>
+      <p class="empty-state" id="slotsEmptyState" hidden>No vehicles found.</p>
+    </section>
+
+    <!-- ---------- PARK VEHICLE ---------- -->
+    <section class="view" id="view-park" data-view="park">
+      <div class="view-head">
+        <div>
+          <h1>Park a Vehicle</h1>
+          <p class="view-sub">The next open bay is assigned automatically.</p>
+        </div>
+      </div>
+
+      <div class="park-layout">
+        <form class="panel form-panel" id="parkForm" novalidate>
+          <div class="form-row">
+            <label for="vehicleType">Vehicle Type</label>
+            <div class="type-select" id="typeSelect" role="radiogroup" aria-label="Vehicle type">
+              <button type="button" class="type-opt is-active" data-type="Car" role="radio" aria-checked="true">
+                <svg viewBox="0 0 24 24"><path d="M5 11l1.6-4.8A2 2 0 0 1 8.5 5h7a2 2 0 0 1 1.9 1.2L19 11m-14 0h14m-14 0a2 2 0 0 0-2 2v5h2m14-7a2 2 0 0 1 2 2v5h-2m-14 0v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2m10 0v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2m-14 0h14"/></svg>
+                <span>Car</span>
+              </button>
+              <button type="button" class="type-opt" data-type="Bike" role="radio" aria-checked="false">
+                <svg viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l4-9h4l3 5m-7-5h6M15 8l3 9"/></svg>
+                <span>Bike</span>
+              </button>
+              <button type="button" class="type-opt" data-type="Truck" role="radio" aria-checked="false">
+                <svg viewBox="0 0 24 24"><path d="M2 8h11v8H2zM13 11h4l4 3v2h-8zM5.5 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM16.5 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>
+                <span>Truck</span>
+              </button>
+            </div>
+            <input type="hidden" id="vehicleType" value="Car">
+          </div>
+
+          <div class="form-row">
+            <label for="plateNumber">Plate Number</label>
+            <input type="text" id="plateNumber" placeholder="e.g. DHA-1234" autocomplete="off">
+            <span class="field-error" id="err-plateNumber"></span>
+          </div>
+
+          <div class="form-row">
+            <label for="ownerName">Owner Name</label>
+            <input type="text" id="ownerName" placeholder="e.g. Rahim Ahmed" autocomplete="off">
+            <span class="field-error" id="err-ownerName"></span>
+          </div>
+
+          <div class="form-row">
+            <label for="inTime">IN Time <span class="hint">(0–23)</span></label>
+            <input type="number" id="inTime" min="0" max="23" placeholder="e.g. 9">
+            <span class="field-error" id="err-inTime"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block">
+            <svg viewBox="0 0 24 24" class="btn-icon"><path d="M12 5v14M5 12h14"/></svg>
+            Park Vehicle
+          </button>
+        </form>
+
+        <div class="panel park-preview">
+          <div class="panel-head"><h2>Next Available Bay</h2></div>
+          <div class="next-slot-visual" id="nextSlotVisual">
+            <span class="next-slot-number" id="nextSlotNumber">—</span>
+            <span class="next-slot-caption">Slot ready for assignment</span>
+          </div>
+          <div class="quick-stats">
+            <div><strong id="qsAvailable">25</strong><span>available</span></div>
+            <div><strong id="qsOccupied">0</strong><span>occupied</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- VEHICLES ---------- -->
+    <section class="view" id="view-vehicles" data-view="vehicles">
+      <div class="view-head">
+        <div>
+          <h1>Vehicles</h1>
+          <p class="view-sub">All vehicles currently parked in the facility.</p>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="chip-group" id="vehicleFilterChips" role="group" aria-label="Filter vehicles">
+          <button class="chip is-active" data-filter="all" type="button">All</button>
+          <button class="chip" data-filter="Car" type="button">Car</button>
+          <button class="chip" data-filter="Bike" type="button">Bike</button>
+          <button class="chip" data-filter="Truck" type="button">Truck</button>
+        </div>
+        <div class="mini-search">
+          <svg viewBox="0 0 24 24" class="search-icon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" id="vehicleSearch" placeholder="Search plate, owner, or slot #">
+        </div>
+      </div>
+
+      <div class="table-wrap panel">
+        <table class="data-table" id="vehicleTable">
+          <thead>
+            <tr>
+              <th>Slot</th><th>Type</th><th>Plate</th><th>Owner</th><th>IN Time</th><th>Duration</th><th>Est. Fee</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="vehicleTableBody"></tbody>
+        </table>
+        <p class="empty-state" id="vehiclesEmptyState" hidden>Your parking area is clear.</p>
+      </div>
+    </section>
+
+    <!-- ---------- ACTIVITY ---------- -->
+    <section class="view" id="view-activity" data-view="activity">
+      <div class="view-head">
+        <div>
+          <h1>Activity History</h1>
+          <p class="view-sub">Every park and removal event, in order.</p>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="chip-group" id="activityFilterChips" role="group" aria-label="Filter activity">
+          <button class="chip is-active" data-filter="all" type="button">All</button>
+          <button class="chip" data-filter="park" type="button">Parked</button>
+          <button class="chip" data-filter="remove" type="button">Removed</button>
+        </div>
+        <div class="mini-search">
+          <svg viewBox="0 0 24 24" class="search-icon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" id="activitySearch" placeholder="Search plate, owner, or slot #">
+        </div>
+        <select class="select-sort" id="activitySort" aria-label="Sort activity">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
+      </div>
+
+      <div class="table-wrap panel">
+        <table class="data-table" id="activityTable">
+          <thead>
+            <tr>
+              <th>Event</th><th>Slot</th><th>Type</th><th>Plate</th><th>Owner</th><th>IN</th><th>OUT</th><th>Duration</th><th>Fee</th><th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="activityTableBody"></tbody>
+        </table>
+        <p class="empty-state" id="activityEmptyState" hidden>No parking activity yet.</p>
+      </div>
+    </section>
+
+    <!-- ---------- REPORTS ---------- -->
+    <section class="view" id="view-reports" data-view="reports">
+      <div class="view-head">
+        <div>
+          <h1>Reports</h1>
+          <p class="view-sub">Facility performance at a glance.</p>
+        </div>
+        <select class="select-sort" id="reportRange" aria-label="Date range">
+          <option value="all">All time</option>
+          <option value="today">Today</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </div>
+
+      <div class="stat-grid stat-grid--reports">
+        <div class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Total Vehicles</span>
+            <span class="stat-value" data-counter="repTotalVehicles">0</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Total Sessions</span>
+            <span class="stat-value" data-counter="repTotalSessions">0</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Total Revenue</span>
+            <span class="stat-value"><span data-counter="repRevenue">0</span> ৳</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Avg. Duration</span>
+            <span class="stat-value"><span data-counter="repAvgDuration">0</span> hrs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-columns">
+        <div class="panel">
+          <div class="panel-head"><h2>Vehicle Type Distribution</h2></div>
+          <canvas id="chartDistribution" width="360" height="240" role="img" aria-label="Vehicle type distribution chart"></canvas>
+          <div class="chart-legend" id="distributionLegend"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Occupancy Rate</h2></div>
+          <canvas id="chartOccupancy" width="360" height="240" role="img" aria-label="Occupancy rate chart"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Revenue by Day</h2></div>
+        <canvas id="chartRevenue" width="760" height="220" role="img" aria-label="Revenue by day chart"></canvas>
+      </div>
+    </section>
+
+    <!-- ---------- SETTINGS ---------- -->
+    <section class="view" id="view-settings" data-view="settings">
+      <div class="view-head">
+        <div>
+          <h1>Settings</h1>
+          <p class="view-sub">Configure how your facility operates.</p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="panel">
+          <div class="panel-head"><h2>Facility</h2></div>
+          <div class="form-row">
+            <label for="settingRate">Parking Rate (৳ / hour)</label>
+            <input type="number" id="settingRate" min="1">
+          </div>
+          <div class="form-row">
+            <label for="settingSlots">Total Slots</label>
+            <input type="number" id="settingSlots" min="1" max="200">
+            <span class="hint">Increasing adds empty bays. Decreasing removes only empty trailing bays.</span>
+          </div>
+          <button class="btn btn-primary" id="saveSettingsBtn" type="button">Save Changes</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Appearance</h2></div>
+          <div class="form-row">
+            <label>Theme</label>
+            <div class="segmented" id="themeSegmented">
+              <button type="button" class="seg-opt" data-theme="dark">Dark</button>
+              <button type="button" class="seg-opt" data-theme="light">Light</button>
+            </div>
+          </div>
+          <div class="form-row form-row--switch">
+            <label for="notifToggle">Enable toast notifications</label>
+            <button class="switch is-on" id="notifToggle" type="button" role="switch" aria-checked="true"><span class="switch-knob"></span></button>
+          </div>
+          <div class="form-row form-row--switch">
+            <label for="motionToggle">Enable animations</label>
+            <button class="switch is-on" id="motionToggle" type="button" role="switch" aria-checked="true"><span class="switch-knob"></span></button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Data</h2></div>
+          <p class="panel-desc">Export a backup, restore from a file, or clear everything and start fresh.</p>
+          <div class="settings-actions">
+            <button class="btn btn-secondary" id="exportJsonBtn" type="button">Export as JSON</button>
+            <button class="btn btn-secondary" id="exportCsvBtn" type="button">Export as CSV</button>
+            <label class="btn btn-secondary" for="importFile">Import Data
+              <input type="file" id="importFile" accept="application/json" hidden>
+            </label>
+            <button class="btn btn-danger" id="clearDataBtn" type="button">Clear All Data</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MOBILE BOTTOM NAV ===================== -->
+<nav class="bottom-nav" aria-label="Primary navigation">
+  <button class="bn-item is-active" data-route="dashboard" type="button">
+    <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9zm0 7h6v-5H4v5zm10 0h6V11h-6v9zm0-16v5h6V4h-6z"/></svg>
+    <span>Home</span>
+  </button>
+  <button class="bn-item" data-route="slots" type="button">
+    <svg viewBox="0 0 24 24"><path d="M3 4h18v3H3V4zm0 6.5h7v10H3v-10zm11 0h7v10h-7v-10z"/></svg>
+    <span>Slots</span>
+  </button>
+  <button class="bn-item bn-item--cta" data-route="park" type="button">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <button class="bn-item" data-route="activity" type="button">
+    <svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm1-15h-2v6l5.2 3.1 1-1.6L13 12V7z"/></svg>
+    <span>Activity</span>
+  </button>
+  <button class="bn-item" data-route="settings" type="button">
+    <svg viewBox="0 0 24 24"><path d="M19.4 13a7.4 7.4 0 0 0 .06-1 7.4 7.4 0 0 0-.06-1l2.1-1.6a.5.5 0 0 0 .12-.66l-2-3.4a.5.5 0 0 0-.6-.22l-2.5 1a7.6 7.6 0 0 0-1.7-1L14.3 2.4a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4l-.4 2.7a7.6 7.6 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.22l-2 3.4a.5.5 0 0 0 .12.66L4.6 11a7.4 7.4 0 0 0 0 2l-2.1 1.6a.5.5 0 0 0-.12.66l2 3.4c.14.23.4.32.6.22l2.5-1c.5.4 1.08.74 1.7 1l.4 2.7a.5.5 0 0 0 .5.4h4a.5.5 0 0 0 .5-.4l.4-2.7c.62-.26 1.2-.6 1.7-1l2.5 1c.2.1.46 0 .6-.22l2-3.4a.5.5 0 0 0-.12-.66L19.4 13zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+    <span>Settings</span>
+  </button>
+</nav>
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<!-- ===================== SLOT DETAIL MODAL ===================== -->
+<div class="modal-overlay" id="slotModalOverlay">
+  <div class="modal" id="slotModal" role="dialog" aria-modal="true" aria-labelledby="slotModalTitle">
+    <button class="modal-close" id="slotModalClose" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="modal-body" id="slotModalBody"></div>
+  </div>
+</div>
+
+<!-- ===================== REMOVE VEHICLE MODAL ===================== -->
+<div class="modal-overlay" id="removeModalOverlay">
+  <div class="modal" id="removeModal" role="dialog" aria-modal="true" aria-labelledby="removeModalTitle">
+    <button class="modal-close" id="removeModalClose" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="modal-body" id="removeModalBody"></div>
+  </div>
+</div>
+
+<!-- ===================== RECEIPT MODAL ===================== -->
+<div class="modal-overlay" id="receiptModalOverlay">
+  <div class="modal modal--receipt" id="receiptModal" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
+    <button class="modal-close" id="receiptModalClose" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="modal-body" id="receiptModalBody"></div>
+  </div>
+</div>
+
+<!-- ===================== CONFIRM MODAL ===================== -->
+<div class="modal-overlay" id="confirmModalOverlay">
+  <div class="modal modal--confirm" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-body" id="confirmModalBody"></div>
+  </div>
+</div>
+
+<!-- ===================== TOASTS ===================== -->
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/state.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
